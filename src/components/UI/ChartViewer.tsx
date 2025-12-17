@@ -11,7 +11,6 @@ import React, { useState, useCallback } from 'react';
 import {
   AviationChart,
   ChartType,
-  ChartProvider,
   getChartService,
   getChartTypeLabel,
   getChartTypeIcon,

@@ -2,4 +2,5 @@
  * Simulation barrel export
  */
 export * from './FlightSimulation';
-export * from './SimulationEngine';
+// SimulationEngine has duplicate exports with FlightSimulation
+export { SimulationEngine } from './SimulationEngine';

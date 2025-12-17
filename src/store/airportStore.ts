@@ -9,12 +9,11 @@
  */
 
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { devtools } from 'zustand/middleware';
 import { EnhancedAirport } from '@/types/airport';
 import { 
   parseAirportsCsv, 
-  loadAirportsFromFile, 
-  EUROPEAN_COUNTRY_CODES 
+  loadAirportsFromFile
 } from '@/services/airports/csvParser';
 
 // ============================================================================

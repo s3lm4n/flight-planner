@@ -144,11 +144,12 @@ interface TafApiResponse {
 function parseCloudCoverage(code?: string): CloudLayer['coverage'] {
   const coverageMap: Record<string, CloudLayer['coverage']> = {
     'SKC': 'SKC',
-    'CLR': 'CLR',
+    'CLR': 'SKC',  // Map CLR to SKC
     'FEW': 'FEW',
     'SCT': 'SCT',
     'BKN': 'BKN',
     'OVC': 'OVC',
+    'VV': 'VV',
   };
   return coverageMap[code?.toUpperCase() || ''] || 'FEW';
 }
@@ -165,20 +166,18 @@ function parseFlightCategory(category?: string): Metar['flightCategory'] {
 
 function parseTafChangeType(code?: string): TafPeriod['type'] {
   const typeMap: Record<string, TafPeriod['type']> = {
-    'FM': 'FROM',
+    'FM': 'FM',
+    'FROM': 'FM',
     'BECMG': 'BECMG',
     'TEMPO': 'TEMPO',
     'PROB': 'PROB',
   };
-  return typeMap[code?.toUpperCase() || ''] || 'FROM';
+  return typeMap[code?.toUpperCase() || ''] || 'FM';
 }
 
 const validWeatherCodes: WeatherPhenomena[] = [
-  'RA', 'SN', 'DZ', 'SG', 'IC', 'PL', 'GR', 'GS', 'UP',
-  'FG', 'BR', 'HZ', 'FU', 'SA', 'DU', 'VA', 'PY',
-  'TS', 'SQ', 'FC', 'SS', 'DS',
-  '-RA', '+RA', '-SN', '+SN', '-DZ', '+DZ',
-  'TSRA', '+TSRA', '-TSRA', 'TSSN', 'VCSH', 'VCTS',
+  'RA', 'SN', 'DZ', 'FG', 'BR', 'HZ', 'TS', 'SH',
+  'GR', 'GS', 'FZ', 'BL', 'MI', 'PR', 'BC', 'DR',
 ];
 
 function isValidWeatherCode(code: string): code is WeatherPhenomena {
@@ -217,11 +216,17 @@ export async function fetchMetar(icao: string): Promise<Metar | null> {
  * Parse METAR response into typed object
  */
 function parseMetarData(data: MetarTafApiResponse, icao: string): Metar {
+  // Handle variable wind properly
+  let variableWind: { from: number; to: number } | undefined;
+  if (data.wind?.variable && typeof data.wind.variable === 'object') {
+    variableWind = data.wind.variable as { from: number; to: number };
+  }
+  
   const wind: Wind = {
     direction: data.wind?.degrees ?? 0,
     speed: data.wind?.speed_kts ?? 0,
     gust: data.wind?.gust_kts,
-    variable: data.wind?.variable,
+    variable: variableWind,
   };
   
   const visibility: Visibility = {
@@ -231,7 +236,7 @@ function parseMetarData(data: MetarTafApiResponse, icao: string): Metar {
   const clouds: CloudLayer[] = (data.clouds || []).map(cloud => ({
     coverage: parseCloudCoverage(cloud.code),
     altitude: Math.round((cloud.base_feet_agl || 0) / 100), // Convert to FL
-    type: cloud.text,
+    type: (cloud.text === 'CB' || cloud.text === 'TCU') ? cloud.text as 'CB' | 'TCU' : undefined,
   }));
   
   const weather: WeatherPhenomena[] = (data.conditions || [])

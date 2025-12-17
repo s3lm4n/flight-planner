@@ -5,4 +5,4 @@ export * from './airports';
 export * from './aircraft';
 export * from './procedures';
 export * from './airways';
-export * from './aircraftDatabase';
+// aircraftDatabase exports are already in aircraft.ts

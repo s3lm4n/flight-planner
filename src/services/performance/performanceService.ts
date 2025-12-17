@@ -12,7 +12,7 @@
 
 import { EnhancedAircraft } from '@/types/aircraft';
 import { EnhancedAirport, EnhancedRunway } from '@/types/airport';
-import { Metar, Wind } from '@/types';
+import { Wind } from '@/types';
 
 // ============================================================================
 // TYPES
@@ -171,7 +171,7 @@ export class AircraftPerformanceServiceStub implements IAircraftPerformanceServi
     aircraft: EnhancedAircraft,
     runway: EnhancedRunway,
     _conditions: PerformanceConditions,
-    weight: number
+    _weight: number
   ): TakeoffPerformance {
     // Return stub values based on basic runway length check
     const basicCheck = runway.lengthMeters >= (aircraft.runwayRequirements?.minTakeoffRunway || 1500);
@@ -226,7 +226,7 @@ export class AircraftPerformanceServiceStub implements IAircraftPerformanceServi
    * Stub RTOW calculation
    */
   calculateRTOW(
-    aircraft: EnhancedAircraft,
+    _aircraft: EnhancedAircraft,
     _runway: EnhancedRunway,
     _conditions: PerformanceConditions
   ): number {

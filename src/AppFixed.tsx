@@ -7,7 +7,7 @@
  * UPDATED: Uses new real-time simulation engine and AviationWeather.gov API
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useFlightStore } from '@/store/flightStore';
 import { FlightMap } from '@/components/Map';
 import { LayerControl } from '@/components/Map/LayerControl';
@@ -17,10 +17,10 @@ import {
   FlightPlanPanel,
   AviationWeatherPanel,
 } from '@/components/UI';
-import { useSimulation, formatFlightPhase } from '@/hooks/useSimulation';
+import { useSimulation } from '@/hooks/useSimulation';
 import { generateFlightPlan } from '@/utils/routeCalculator';
 import { buildCompleteRouteGeoJSON } from '@/utils/geojson';
-import { Coordinate, RouteSegmentType, FlightPlan } from '@/types';
+import { RouteSegmentType, FlightPlan } from '@/types';
 import { formatDistance } from '@/utils/aviation';
 
 // ============================================================================
@@ -63,7 +63,7 @@ const SimulationControls: React.FC<SimulationControlsProps> = ({
   etaFormatted,
   distanceCovered,
   distanceRemaining,
-  phase,
+  phase: _phase,
   phaseLabel,
   groundSpeed,
   altitude,

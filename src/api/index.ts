@@ -3,8 +3,21 @@
  */
 export * from './client';
 export * from './weather';
-export * from './weatherService';
+// weatherService has duplicate exports with weather.ts, export selectively
+export { 
+  getWindFromMetar,
+  getWindFromTafAtTime,
+  getVisibilityCategory,
+  isWeatherSuitable,
+  clearWeatherCache
+} from './weatherService';
 export * from './icao';
 
 // New AviationWeather.gov API (recommended)
-export * from './aviationWeather';
+export { 
+  fetchMetar as fetchAwcMetar,
+  fetchTaf as fetchAwcTaf,
+  fetchAirportWeather as fetchAwcAirportWeather,
+  fetchMultipleAirportWeather as fetchAwcMultipleAirportWeather,
+  getFlightCategoryColor
+} from './aviationWeather';

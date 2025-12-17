@@ -17,10 +17,10 @@ import {
   AnimationControls,
 } from '@/components/UI';
 import { useAnimation, extractWindFromMetar } from '@/hooks/useAnimation';
-import { fetchWeather } from '@/api/weather';
+import { fetchAirportWeather } from '@/api/weather';
 import { generateFlightPlan } from '@/utils/routeCalculator';
 import { buildCompleteRouteGeoJSON } from '@/utils/geojson';
-import { Coordinate, RouteSegmentType, Airport } from '@/types';
+import { Coordinate, RouteSegmentType } from '@/types';
 import { FlightPhase } from '@/simulation/FlightSimulation';
 
 const App: React.FC = () => {
@@ -124,10 +124,10 @@ const App: React.FC = () => {
       const promises: Promise<any>[] = [];
       
       if (deps.length > 0) {
-        promises.push(fetchWeather(deps[0]));
+        promises.push(fetchAirportWeather(deps[0]));
       }
       if (arrs.length > 0) {
-        promises.push(fetchWeather(arrs[0]));
+        promises.push(fetchAirportWeather(arrs[0]));
       }
       
       const results = await Promise.all(promises);

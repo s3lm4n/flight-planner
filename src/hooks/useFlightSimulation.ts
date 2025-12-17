@@ -18,7 +18,6 @@ import {
   calculateBearing,
   calculateWindCorrectionAngle,
   calculateGroundSpeed,
-  calculateDistance,
 } from '@/utils/aviation';
 
 // ============================================================================
@@ -181,7 +180,7 @@ function buildWaypoints(flightPlan: FlightPlan, wind: Wind | null): SimWaypoint[
     
     // Calculate ground speed considering wind
     let groundSpeed = targetSpeed;
-    if (wind && wind.speed > 0 && phase !== 'TAXI_OUT' && phase !== 'TAXI_IN' && phase !== 'PREFLIGHT') {
+    if (wind && wind.speed > 0 && phase !== 'TAXI_OUT' && phase !== 'TAXI_IN') {
       const course = calculateBearing(leg.from.position, leg.to.position);
       groundSpeed = calculateGroundSpeed(course, targetSpeed, wind);
     }

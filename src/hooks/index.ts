@@ -20,6 +20,6 @@ export {
   useSimulation,
   type UseSimulationOptions,
   type UseSimulationReturn,
-  FlightPhase as SimulationPhase,
   formatFlightPhase,
 } from './useSimulation';
+export type { FlightPhase as SimulationPhase } from './useSimulation';

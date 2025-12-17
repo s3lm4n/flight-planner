@@ -9,7 +9,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { fetchNotams, Notam, NotamSeverity, NotamType } from '@/api/icao';
+import { fetchNotams } from '@/api/icao';
+import { Notam, NotamSeverity, NotamType } from '@/types/airport';
 
 interface NotamPanelProps {
   departureIcao: string | null;

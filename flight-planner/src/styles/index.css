@@ -1,0 +1,269 @@
+/**
+ * Global Styles
+ * 
+ * Tailwind CSS base + components + utilities + custom styles
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS Variables */
+:root {
+  --sid-color: #10B981;       /* Green for SID */
+  --enroute-color: #3B82F6;   /* Blue for Enroute */
+  --star-color: #F59E0B;      /* Amber for STAR */
+  --approach-color: #EF4444;  /* Red for Approach */
+  --taxi-color: #6B7280;      /* Gray for Taxi */
+}
+
+/* Base styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply font-sans antialiased text-gray-900 bg-gray-50;
+  }
+  
+  /* Better focus styles */
+  *:focus {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+  }
+  
+  /* Remove focus ring for mouse users */
+  *:focus:not(:focus-visible) {
+    @apply ring-0 ring-offset-0;
+  }
+}
+
+/* Component styles */
+@layer components {
+  /* Airport selector dropdown */
+  .airport-selector .dropdown {
+    @apply absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg;
+  }
+  
+  /* Aircraft selector styles */
+  .aircraft-selector .aircraft-list {
+    @apply max-h-64 overflow-auto;
+  }
+  
+  /* Weather panel styles */
+  .weather-panel .metar-raw {
+    @apply font-mono text-xs bg-gray-100 p-2 rounded break-all;
+  }
+  
+  /* Flight plan panel styles */
+  .flight-plan-panel .leg-row:hover {
+    @apply bg-blue-50;
+  }
+  
+  /* Map container */
+  .map-container {
+    @apply w-full h-[600px] rounded-lg overflow-hidden;
+  }
+  
+  /* Custom scrollbar */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #CBD5E1 #F1F5F9;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    @apply w-2;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-gray-100 rounded;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded hover:bg-gray-400;
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  /* Text shadow for better readability on maps */
+  .text-shadow {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Leaflet overrides */
+.leaflet-container {
+  @apply font-sans;
+  z-index: 0;
+}
+
+.leaflet-popup-content-wrapper {
+  @apply rounded-lg shadow-lg;
+}
+
+.leaflet-popup-content {
+  @apply m-3;
+}
+
+.leaflet-tooltip {
+  @apply bg-white border-gray-200 shadow-lg rounded-lg;
+}
+
+.route-tooltip {
+  @apply text-sm bg-white p-2 rounded shadow-lg border border-gray-200;
+}
+
+.route-tooltip strong {
+  @apply text-blue-600;
+}
+
+/* Aircraft marker */
+.aircraft-marker {
+  background: none !important;
+  border: none !important;
+}
+
+.aircraft-popup {
+  @apply min-w-[220px];
+}
+
+/* Layer control */
+.layer-control label {
+  @apply cursor-pointer;
+}
+
+.layer-control input[type="checkbox"] {
+  @apply sr-only;
+}
+
+/* Progress slider */
+input[type="range"].slider-purple {
+  @apply appearance-none bg-transparent cursor-pointer;
+}
+
+input[type="range"].slider-purple::-webkit-slider-runnable-track {
+  @apply h-2 bg-gray-200 rounded-full;
+}
+
+input[type="range"].slider-purple::-webkit-slider-thumb {
+  @apply appearance-none w-4 h-4 bg-purple-600 rounded-full -mt-1 shadow cursor-pointer;
+}
+
+input[type="range"].slider-purple::-webkit-slider-thumb:hover {
+  @apply bg-purple-700;
+}
+
+input[type="range"].slider-purple::-moz-range-track {
+  @apply h-2 bg-gray-200 rounded-full;
+}
+
+input[type="range"].slider-purple::-moz-range-thumb {
+  @apply w-4 h-4 bg-purple-600 rounded-full border-0 shadow cursor-pointer;
+}
+
+input[type="range"].slider-purple::-moz-range-thumb:hover {
+  @apply bg-purple-700;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  @apply animate-spin rounded-full border-4 border-gray-200;
+  border-top-color: #3B82F6;
+}
+
+/* Route segment colors */
+.segment-sid {
+  color: var(--sid-color);
+}
+
+.segment-enroute {
+  color: var(--enroute-color);
+}
+
+.segment-star {
+  color: var(--star-color);
+}
+
+.segment-approach {
+  color: var(--approach-color);
+}
+
+.segment-taxi {
+  color: var(--taxi-color);
+}
+
+.bg-segment-sid {
+  background-color: var(--sid-color);
+}
+
+.bg-segment-enroute {
+  background-color: var(--enroute-color);
+}
+
+.bg-segment-star {
+  background-color: var(--star-color);
+}
+
+.bg-segment-approach {
+  background-color: var(--approach-color);
+}
+
+.bg-segment-taxi {
+  background-color: var(--taxi-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .map-container {
+    @apply h-[400px];
+  }
+}
+
+@media (max-width: 640px) {
+  .map-container {
+    @apply h-[300px];
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .map-container {
+    height: 400px !important;
+  }
+}

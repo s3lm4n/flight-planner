@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <g fill="#1a365d" stroke="#fff" stroke-width="1">
+    <!-- Fuselage -->
+    <path d="M32 4 L36 20 L36 50 L40 58 L24 58 L28 50 L28 20 Z"/>
+    <!-- Wings -->
+    <path d="M28 24 L4 36 L4 40 L28 34 Z"/>
+    <path d="M36 24 L60 36 L60 40 L36 34 Z"/>
+    <!-- Tail -->
+    <path d="M28 48 L20 56 L20 58 L28 54 Z"/>
+    <path d="M36 48 L44 56 L44 58 L36 54 Z"/>
+    <!-- Horizontal Stabilizer -->
+    <path d="M24 52 L16 54 L16 56 L24 55 Z"/>
+    <path d="M40 52 L48 54 L48 56 L40 55 Z"/>
+  </g>
+</svg>

@@ -4,10 +4,10 @@
  * Flight Planning and Visualization System
  * Integrates all components for a complete EFB experience.
  * 
- * UPDATED: Uses simple simulation engine and AviationWeather.gov API
+ * UPDATED: Uses new real-time simulation engine and AviationWeather.gov API
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useFlightStore } from '@/store/flightStore';
 import { FlightMap } from '@/components/Map';
 import { LayerControl } from '@/components/Map/LayerControl';
@@ -17,10 +17,10 @@ import {
   FlightPlanPanel,
   AviationWeatherPanel,
 } from '@/components/UI';
-import { useSimpleSimulation } from '@/hooks/useSimpleSimulation';
+import { useSimulation, formatFlightPhase } from '@/hooks/useSimulation';
 import { generateFlightPlan } from '@/utils/routeCalculator';
 import { buildCompleteRouteGeoJSON } from '@/utils/geojson';
-import { RouteSegmentType, FlightPlan } from '@/types';
+import { Coordinate, RouteSegmentType, FlightPlan } from '@/types';
 import { formatDistance } from '@/utils/aviation';
 
 // ============================================================================
@@ -37,6 +37,7 @@ interface SimulationControlsProps {
   etaFormatted: string;
   distanceCovered: number;
   distanceRemaining: number;
+  phase: string;
   phaseLabel: string;
   groundSpeed: number;
   altitude: number;
@@ -62,6 +63,7 @@ const SimulationControls: React.FC<SimulationControlsProps> = ({
   etaFormatted,
   distanceCovered,
   distanceRemaining,
+  phase,
   phaseLabel,
   groundSpeed,
   altitude,
@@ -274,8 +276,8 @@ const App: React.FC = () => {
     setIsGeneratingPlan,
   } = useFlightStore();
 
-  // Use the simple simulation hook
-  const simulation = useSimpleSimulation({
+  // Use the new real-time simulation hook
+  const simulation = useSimulation({
     flightPlan,
     onComplete: () => {
       console.log('Flight completed!');
@@ -482,6 +484,7 @@ const App: React.FC = () => {
                   etaFormatted={simulation.etaFormatted}
                   distanceCovered={simulation.distanceCovered}
                   distanceRemaining={simulation.distanceRemaining}
+                  phase={simulation.phase}
                   phaseLabel={simulation.phaseLabel}
                   groundSpeed={simulation.groundSpeed}
                   altitude={simulation.altitude}

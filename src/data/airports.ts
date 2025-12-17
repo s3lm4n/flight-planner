@@ -1040,6 +1040,116 @@ export const airports: Record<string, Airport> = {
       center: 126.9
     }
   },
+
+  LTBU: {
+    icao: 'LTBU',
+    iata: 'KCM',
+    name: 'Kahramanmaraş Airport',
+    city: 'Kahramanmaraş',
+    country: 'Turkey',
+    position: { lat: 37.5388, lon: 36.9535 },
+    elevation: 1723,
+    magneticVariation: 5.0,
+    timezone: 'Europe/Istanbul',
+    runways: [
+      {
+        id: '04/22',
+        length: 9843,
+        width: 148,
+        surface: 'ASPH',
+        lighting: true,
+        ends: [
+          {
+            designator: '04',
+            heading: 40,
+            threshold: { lat: 37.5320, lon: 36.9430 },
+            elevation: 1720,
+            tora: 9843,
+            toda: 9843,
+            asda: 9843,
+            lda: 9843
+          },
+          {
+            designator: '22',
+            heading: 220,
+            threshold: { lat: 37.5456, lon: 36.9640 },
+            elevation: 1726,
+            tora: 9843,
+            toda: 9843,
+            asda: 9843,
+            lda: 9843
+          }
+        ]
+      }
+    ],
+    parking: [
+      { name: 'APRON1', position: { lat: 37.5390, lon: 36.9540 }, heading: 90, type: 'RAMP', size: 'M' },
+    ],
+    taxiways: [
+      { name: 'A', path: [{ lat: 37.5390, lon: 36.9540 }, { lat: 37.5380, lon: 36.9520 }], width: 60, surface: 'ASPH' },
+    ],
+    frequencies: {
+      tower: 118.1,
+      approach: 119.7,
+      center: 128.8
+    }
+  },
+
+  LTCN: {
+    icao: 'LTCN',
+    iata: 'TEQ',
+    name: 'Tekirdağ Çorlu Airport',
+    city: 'Tekirdağ',
+    country: 'Turkey',
+    position: { lat: 41.1382, lon: 27.9191 },
+    elevation: 574,
+    magneticVariation: 5.5,
+    timezone: 'Europe/Istanbul',
+    runways: [
+      {
+        id: '08/26',
+        length: 9843,
+        width: 148,
+        surface: 'ASPH',
+        lighting: true,
+        ends: [
+          {
+            designator: '08',
+            heading: 80,
+            threshold: { lat: 41.1350, lon: 27.8983 },
+            elevation: 570,
+            tora: 9843,
+            toda: 9843,
+            asda: 9843,
+            lda: 9843,
+            ils: { frequency: 110.1, course: 80, glideslope: 3.0, categoryType: 'I' }
+          },
+          {
+            designator: '26',
+            heading: 260,
+            threshold: { lat: 41.1414, lon: 27.9400 },
+            elevation: 578,
+            tora: 9843,
+            toda: 9843,
+            asda: 9843,
+            lda: 9843,
+            ils: { frequency: 108.7, course: 260, glideslope: 3.0, categoryType: 'I' }
+          }
+        ]
+      }
+    ],
+    parking: [
+      { name: 'APRON1', position: { lat: 41.1390, lon: 27.9200 }, heading: 90, type: 'RAMP', size: 'M' },
+    ],
+    taxiways: [
+      { name: 'A', path: [{ lat: 41.1390, lon: 27.9200 }, { lat: 41.1380, lon: 27.9150 }], width: 60, surface: 'ASPH' },
+    ],
+    frequencies: {
+      tower: 118.5,
+      approach: 120.1,
+      center: 126.9
+    }
+  },
   
   // ============================================================================
   // ASIA

@@ -400,6 +400,8 @@ export function calculateDestination(
 
 /**
  * Interpolate a position along a great circle path
+ * Uses spherical linear interpolation (slerp) for efficient real-time animation.
+ * 
  * @param from Start coordinate
  * @param to End coordinate
  * @param fraction Progress along the path (0-1)
@@ -410,27 +412,52 @@ export function interpolatePosition(
   to: Coordinate,
   fraction: number
 ): Coordinate {
-  const point1 = turf.point([from.lon, from.lat]);
-  const point2 = turf.point([to.lon, to.lat]);
+  // Clamp fraction to [0, 1]
+  const t = Math.max(0, Math.min(1, fraction));
   
-  // Create a great circle line
-  const line = turf.greatCircle(point1, point2, { npoints: 100 });
+  // Handle edge cases
+  if (t <= 0) return { lat: from.lat, lon: from.lon };
+  if (t >= 1) return { lat: to.lat, lon: to.lon };
   
-  // Handle potential MultiLineString from greatCircle
-  const lineString = line.geometry.type === 'MultiLineString' 
-    ? turf.lineString(line.geometry.coordinates.flat() as [number, number][])
-    : line as GeoJSON.Feature<GeoJSON.LineString>;
+  // Convert to radians
+  const lat1 = from.lat * Math.PI / 180;
+  const lon1 = from.lon * Math.PI / 180;
+  const lat2 = to.lat * Math.PI / 180;
+  const lon2 = to.lon * Math.PI / 180;
   
-  // Get total length
-  const totalLength = turf.length(lineString, { units: 'kilometers' });
+  // Calculate angular distance using Haversine
+  const dLat = lat2 - lat1;
+  const dLon = lon2 - lon1;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1) * Math.cos(lat2) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   
-  // Find point at fraction of distance
-  const distanceKm = totalLength * Math.max(0, Math.min(1, fraction));
-  const point = turf.along(lineString, distanceKm, { units: 'kilometers' });
+  // If points are very close, use linear interpolation
+  if (c < 0.0001) {
+    return {
+      lat: from.lat + (to.lat - from.lat) * t,
+      lon: from.lon + (to.lon - from.lon) * t,
+    };
+  }
+  
+  // Spherical linear interpolation (SLERP)
+  const sinC = Math.sin(c);
+  const A = Math.sin((1 - t) * c) / sinC;
+  const B = Math.sin(t * c) / sinC;
+  
+  // Calculate 3D Cartesian coordinates
+  const x = A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2) * Math.cos(lon2);
+  const y = A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2) * Math.sin(lon2);
+  const z = A * Math.sin(lat1) + B * Math.sin(lat2);
+  
+  // Convert back to lat/lon
+  const lat = Math.atan2(z, Math.sqrt(x * x + y * y));
+  const lon = Math.atan2(y, x);
   
   return {
-    lat: point.geometry.coordinates[1],
-    lon: point.geometry.coordinates[0],
+    lat: lat * 180 / Math.PI,
+    lon: lon * 180 / Math.PI,
   };
 }
 

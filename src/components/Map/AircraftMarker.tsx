@@ -20,24 +20,33 @@ interface AircraftMarkerProps {
   altitude?: number;
 }
 
-// Create custom aircraft icon with rotation support
+// Create custom aircraft icon with rotation support - realistic airplane shape
 const createAircraftIcon = (heading: number): L.DivIcon => {
+  // Airplane SVG - pointing up (north) by default
   const svgIcon = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40" style="transform: rotate(${heading}deg);">
-      <path d="M12 2L4 14h3l1 8h8l1-8h3L12 2z" 
-            fill="#1a365d" 
-            stroke="#fff" 
-            stroke-width="1"
-            stroke-linejoin="round"/>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="36" height="36" style="transform: rotate(${heading}deg); filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.4));">
+      <!-- Fuselage -->
+      <path d="M16 1 L18 8 L18 24 L20 28 L12 28 L14 24 L14 8 Z" 
+            fill="#1e40af" stroke="#fff" stroke-width="0.5"/>
+      <!-- Wings -->
+      <path d="M16 10 L30 16 L30 18 L18 15 L18 15 L14 15 L2 18 L2 16 Z" 
+            fill="#2563eb" stroke="#fff" stroke-width="0.5"/>
+      <!-- Tail -->
+      <path d="M16 22 L22 26 L22 27 L18 25 L14 25 L10 27 L10 26 Z" 
+            fill="#3b82f6" stroke="#fff" stroke-width="0.5"/>
+      <!-- Cockpit -->
+      <ellipse cx="16" cy="5" rx="1.5" ry="2" fill="#60a5fa"/>
+      <!-- Engine glow effect -->
+      <circle cx="16" cy="28" r="1" fill="#fbbf24" opacity="0.8"/>
     </svg>
   `;
   
   return L.divIcon({
     className: 'aircraft-marker',
     html: svgIcon,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
-    popupAnchor: [0, -20],
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+    popupAnchor: [0, -18],
   });
 };
 

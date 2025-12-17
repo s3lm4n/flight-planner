@@ -12,3 +12,10 @@ export { AnimationControls } from './AnimationControls';
 export { EnhancedAirportSelector } from './EnhancedAirportSelector';
 export { EnhancedAircraftSelector } from './EnhancedAircraftSelector';
 export { ValidationWarningsPanel } from './ValidationWarningsPanel';
+
+// New components
+export { NotamPanel } from './NotamPanel';
+export { SimulationDashboard } from './SimulationDashboard';
+export { ChartViewer } from './ChartViewer';
+export { AirportLoader } from './AirportLoader';
+export { AviationWeatherPanel } from './AviationWeatherPanel';

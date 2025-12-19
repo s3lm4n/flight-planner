@@ -45,14 +45,14 @@ export default defineConfig({
         },
         secure: true,
       },
-      // Alternative: OpenAIP for airport data
+      // OpenAIP API - Authoritative source for airport/runway data
       '/api/openaip': {
         target: 'https://api.core.openaip.net/api',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/openaip/, ''),
         headers: {
           'Accept': 'application/json',
-          'x-openaip-api-key': 'ea2cd274-4785-4c82-9a54-558c8b956a06',
+          'x-openaip-client-id': '837fd9e5ed75dd9111c70592a499600d',
         },
         secure: true,
       },

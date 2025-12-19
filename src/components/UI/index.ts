@@ -19,3 +19,6 @@ export { SimulationDashboard } from './SimulationDashboard';
 export { ChartViewer } from './ChartViewer';
 export { AirportLoader } from './AirportLoader';
 export { AviationWeatherPanel } from './AviationWeatherPanel';
+
+// Dispatch
+export { DispatchPanel } from './DispatchPanel';

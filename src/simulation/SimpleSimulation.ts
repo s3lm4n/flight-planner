@@ -1,8 +1,13 @@
 /**
  * Simple Flight Simulation Engine
  * 
- * A straightforward simulation that uses setInterval for reliable updates.
- * This is a simplified approach that prioritizes reliability over complexity.
+ * A straightforward simulation that uses requestAnimationFrame for smooth updates.
+ * This ensures the simulation never freezes and runs smoothly with React's render cycle.
+ * 
+ * Key fixes:
+ * - Uses requestAnimationFrame instead of setInterval for smoother updates
+ * - Non-blocking rendering
+ * - Proper cleanup on stop/destroy
  */
 
 import { Coordinate, FlightPlan, FlightLeg } from '@/types';
@@ -52,7 +57,8 @@ export interface SimulationCallbacks {
 // CONSTANTS
 // ============================================================================
 
-const UPDATE_INTERVAL_MS = 50; // 20 updates per second
+const TARGET_FPS = 30; // Target 30 FPS for smooth updates
+const MIN_FRAME_TIME_MS = 1000 / TARGET_FPS;
 
 const PHASE_SPEEDS: Record<FlightPhase, number> = {
   PREFLIGHT: 0,
@@ -74,9 +80,11 @@ const PHASE_SPEEDS: Record<FlightPhase, number> = {
 export class SimpleSimulation {
   private flightPlan: FlightPlan | null = null;
   private totalDistance: number = 0;
-  private intervalId: ReturnType<typeof setInterval> | null = null;
+  private animationFrameId: number | null = null;
+  private lastFrameTime: number = 0;
   private timeScale: number = 1;
   private callbacks: SimulationCallbacks | null = null;
+  private isDestroyed: boolean = false;
   
   private state: SimulationState = {
     position: { lat: 0, lon: 0 },
@@ -101,10 +109,12 @@ export class SimpleSimulation {
    */
   public initialize(flightPlan: FlightPlan, callbacks: SimulationCallbacks): void {
     this.stop();
+    this.isDestroyed = false;
     
     this.flightPlan = flightPlan;
     this.callbacks = callbacks;
     this.timeScale = 1;
+    this.lastFrameTime = 0;
     
     // Calculate total distance
     this.totalDistance = flightPlan.legs.reduce((sum, leg) => sum + leg.distance, 0);
@@ -132,10 +142,10 @@ export class SimpleSimulation {
   }
 
   /**
-   * Start or resume simulation
+   * Start or resume simulation using requestAnimationFrame
    */
   public play(): void {
-    if (!this.flightPlan || this.state.isComplete) return;
+    if (!this.flightPlan || this.state.isComplete || this.isDestroyed) return;
     if (this.state.isRunning && !this.state.isPaused) return;
     
     // Transition from PREFLIGHT
@@ -145,10 +155,11 @@ export class SimpleSimulation {
     
     this.state.isRunning = true;
     this.state.isPaused = false;
+    this.lastFrameTime = performance.now();
     
-    // Start interval if not already running
-    if (this.intervalId === null) {
-      this.intervalId = setInterval(() => this.tick(), UPDATE_INTERVAL_MS);
+    // Start animation loop if not already running
+    if (this.animationFrameId === null) {
+      this.scheduleNextFrame();
     }
     
     this.notifyStateUpdate();
@@ -168,9 +179,10 @@ export class SimpleSimulation {
    * Stop and reset simulation
    */
   public stop(): void {
-    if (this.intervalId !== null) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
+    // Cancel any pending animation frame
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
     }
     
     if (this.flightPlan) {
@@ -253,6 +265,7 @@ export class SimpleSimulation {
    * Destroy
    */
   public destroy(): void {
+    this.isDestroyed = true;
     this.stop();
     this.flightPlan = null;
     this.callbacks = null;
@@ -262,13 +275,60 @@ export class SimpleSimulation {
   // PRIVATE METHODS
   // ============================================================================
 
-  private tick(): void {
+  /**
+   * Schedule next animation frame
+   */
+  private scheduleNextFrame(): void {
+    if (this.isDestroyed) return;
+    
+    this.animationFrameId = requestAnimationFrame((timestamp) => {
+      this.animationLoop(timestamp);
+    });
+  }
+
+  /**
+   * Main animation loop using requestAnimationFrame
+   */
+  private animationLoop(timestamp: number): void {
+    // Exit if destroyed or stopped
+    if (this.isDestroyed || !this.state.isRunning) {
+      this.animationFrameId = null;
+      return;
+    }
+    
+    // Skip if paused but keep loop running
+    if (this.state.isPaused) {
+      this.lastFrameTime = timestamp;
+      this.scheduleNextFrame();
+      return;
+    }
+    
+    // Calculate delta time
+    const deltaMs = timestamp - this.lastFrameTime;
+    
+    // Throttle to target FPS
+    if (deltaMs >= MIN_FRAME_TIME_MS) {
+      this.tick(deltaMs);
+      this.lastFrameTime = timestamp;
+    }
+    
+    // Schedule next frame if still running
+    if (this.state.isRunning && !this.state.isComplete) {
+      this.scheduleNextFrame();
+    } else {
+      this.animationFrameId = null;
+    }
+  }
+
+  private tick(deltaMs: number = MIN_FRAME_TIME_MS): void {
     if (!this.state.isRunning || this.state.isPaused || this.state.isComplete) {
       return;
     }
     
     // Calculate time step (convert ms to seconds, apply scale)
-    const deltaSeconds = (UPDATE_INTERVAL_MS / 1000) * this.timeScale;
+    // Cap delta to prevent jumps on tab switch
+    const cappedDeltaMs = Math.min(deltaMs, 100);
+    const deltaSeconds = (cappedDeltaMs / 1000) * this.timeScale;
     
     // Get current speed based on phase
     const speed = PHASE_SPEEDS[this.state.phase] || PHASE_SPEEDS.CRUISE;
@@ -480,9 +540,10 @@ export class SimpleSimulation {
   }
 
   private completeSimulation(): void {
-    if (this.intervalId !== null) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
+    // Cancel animation frame
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
     }
     
     if (this.flightPlan) {

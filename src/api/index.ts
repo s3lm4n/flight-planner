@@ -21,3 +21,12 @@ export {
   fetchMultipleAirportWeather as fetchAwcMultipleAirportWeather,
   getFlightCategoryColor
 } from './aviationWeather';
+
+// OpenAIP API - Authoritative source for airport/runway data
+export {
+  fetchAirportFromOpenAIP,
+  searchAirportsOpenAIP,
+  fetchAirportsInBounds,
+  validateIcaoCode,
+  getRunwaysFromOpenAIP,
+} from './openAIP';

@@ -13,3 +13,6 @@ export * from './performance/performanceService';
 
 // Chart services
 export * from './charts/chartService';
+
+// Dispatch services
+export * from './dispatch/dispatchService';

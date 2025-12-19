@@ -7,7 +7,7 @@
  * UPDATED: Uses simple simulation engine and AviationWeather.gov API
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useFlightStore } from '@/store/flightStore';
 import { FlightMap } from '@/components/Map';
 import { LayerControl } from '@/components/Map/LayerControl';
@@ -16,12 +16,14 @@ import {
   AircraftSelector, 
   FlightPlanPanel,
   AviationWeatherPanel,
+  DispatchPanel,
 } from '@/components/UI';
 import { useSimpleSimulation } from '@/hooks/useSimpleSimulation';
 import { generateFlightPlan } from '@/utils/routeCalculator';
 import { buildCompleteRouteGeoJSON } from '@/utils/geojson';
 import { RouteSegmentType, FlightPlan } from '@/types';
 import { formatDistance } from '@/utils/aviation';
+import { AirportWeather } from '@/api/aviationWeather';
 
 // ============================================================================
 // SIMULATION CONTROLS COMPONENT
@@ -274,6 +276,16 @@ const App: React.FC = () => {
     setIsGeneratingPlan,
   } = useFlightStore();
 
+  // Weather state for dispatch
+  const [departureWeather, setDepartureWeather] = useState<AirportWeather | null>(null);
+  const [arrivalWeather, setArrivalWeather] = useState<AirportWeather | null>(null);
+
+  // Weather update handler
+  const handleWeatherUpdate = useCallback((depWx: AirportWeather | null, arrWx: AirportWeather | null) => {
+    setDepartureWeather(depWx);
+    setArrivalWeather(arrWx);
+  }, []);
+
   // Use the simple simulation hook
   const simulation = useSimpleSimulation({
     flightPlan,
@@ -434,7 +446,19 @@ const App: React.FC = () => {
             <AviationWeatherPanel
               departureAirport={departureAirport}
               arrivalAirport={arrivalAirport}
+              onWeatherUpdate={handleWeatherUpdate}
             />
+
+            {/* Dispatch Panel - Professional dispatch decision */}
+            {flightPlan && (
+              <DispatchPanel
+                flightPlan={flightPlan}
+                departureAirport={departureAirport}
+                arrivalAirport={arrivalAirport}
+                departureWeather={departureWeather?.metar || null}
+                arrivalWeather={arrivalWeather?.metar || null}
+              />
+            )}
           </aside>
 
           {/* Center - Map */}

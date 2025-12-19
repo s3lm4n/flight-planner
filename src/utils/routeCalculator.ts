@@ -125,6 +125,7 @@ export function calculateCruiseAltitude(
 
 /**
  * Generate great circle waypoints between two points
+ * Uses proper spherical interpolation for accurate great-circle routing
  */
 function generateEnrouteWaypoints(
   from: Coordinate,
@@ -133,22 +134,79 @@ function generateEnrouteWaypoints(
 ): Waypoint[] {
   const waypoints: Waypoint[] = [];
   
+  if (count === 0) return waypoints;
+  
   for (let i = 1; i <= count; i++) {
     const fraction = i / (count + 1);
     
-    // Simple linear interpolation (for short distances)
-    // For production, use great circle interpolation
-    const lat = from.lat + (to.lat - from.lat) * fraction;
-    const lon = from.lon + (to.lon - from.lon) * fraction;
+    // Great circle interpolation using spherical trigonometry
+    const position = interpolateGreatCircle(from, to, fraction);
     
     waypoints.push(createWaypoint(
       `ENRTE${i}`,
-      { lat, lon },
+      position,
       `Enroute Point ${i}`
     ));
   }
   
   return waypoints;
+}
+
+/**
+ * Interpolate position along great circle route
+ * This is the proper way to calculate intermediate points on a great circle
+ */
+function interpolateGreatCircle(from: Coordinate, to: Coordinate, fraction: number): Coordinate {
+  // Convert to radians
+  const lat1 = from.lat * Math.PI / 180;
+  const lon1 = from.lon * Math.PI / 180;
+  const lat2 = to.lat * Math.PI / 180;
+  const lon2 = to.lon * Math.PI / 180;
+  
+  // Angular distance between points
+  const d = 2 * Math.asin(
+    Math.sqrt(
+      Math.pow(Math.sin((lat2 - lat1) / 2), 2) +
+      Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lon2 - lon1) / 2), 2)
+    )
+  );
+  
+  // Handle very close points (avoid division by zero)
+  if (d < 0.00001) {
+    return {
+      lat: from.lat + (to.lat - from.lat) * fraction,
+      lon: from.lon + (to.lon - from.lon) * fraction,
+    };
+  }
+  
+  // Interpolation factors
+  const A = Math.sin((1 - fraction) * d) / Math.sin(d);
+  const B = Math.sin(fraction * d) / Math.sin(d);
+  
+  // Cartesian coordinates of the interpolated point
+  const x = A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2) * Math.cos(lon2);
+  const y = A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2) * Math.sin(lon2);
+  const z = A * Math.sin(lat1) + B * Math.sin(lat2);
+  
+  // Convert back to lat/lon
+  const lat = Math.atan2(z, Math.sqrt(x * x + y * y)) * 180 / Math.PI;
+  const lon = Math.atan2(y, x) * 180 / Math.PI;
+  
+  return { lat, lon };
+}
+
+/**
+ * Calculate total great circle distance for a route
+ */
+export function calculateGreatCircleRouteDistance(waypoints: Coordinate[]): number {
+  if (waypoints.length < 2) return 0;
+  
+  let totalDistance = 0;
+  for (let i = 0; i < waypoints.length - 1; i++) {
+    totalDistance += calculateDistance(waypoints[i], waypoints[i + 1]);
+  }
+  
+  return totalDistance;
 }
 
 // ============================================================================

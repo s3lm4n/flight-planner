@@ -1,10 +1,11 @@
 /**
- * Application Entry Point
+ * Flight Planner Application Entry Point
+ * 
+ * Main entry that renders the Flight Planner Pro application.
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-// Use App for now (AppEnhanced has the enhanced features but needs more work)
 import App from './App';
 import './styles/index.css';
 

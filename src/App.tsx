@@ -5,6 +5,7 @@
  * Integrates all components for a complete EFB experience.
  * 
  * UPDATED: Uses simple simulation engine and AviationWeather.gov API
+ * UPDATED: Includes Settings panel with CSV airport import
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -18,6 +19,7 @@ import {
   AviationWeatherPanel,
   DispatchPanel,
 } from '@/components/UI';
+import { SettingsPanel, SettingsProvider, useSettings } from '@/components/UI/SettingsPanel';
 import { useSimpleSimulation } from '@/hooks/useSimpleSimulation';
 import { generateFlightPlan } from '@/utils/routeCalculator';
 import { buildCompleteRouteGeoJSON } from '@/utils/geojson';
@@ -256,7 +258,11 @@ const SimulationControls: React.FC<SimulationControlsProps> = ({
 // MAIN APP COMPONENT
 // ============================================================================
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  // Settings
+  const { airportCount } = useSettings();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
   // Store state
   const {
     departureAirport,
@@ -362,6 +368,9 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Settings Panel */}
+      <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+
       {/* Header */}
       <header className="bg-gradient-to-r from-blue-800 to-blue-900 shadow-lg">
         <div className="container mx-auto px-4 py-4">
@@ -374,26 +383,50 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            {flightPlan && (
-              <div className="flex items-center gap-4">
-                <div className="text-white text-center">
-                  <div className="text-2xl font-bold">
-                    {flightPlan.departure.icao}
-                    <span className="mx-2 text-blue-300">→</span>
-                    {flightPlan.arrival.icao}
-                  </div>
-                  <div className="text-sm text-blue-200">
-                    {flightPlan.aircraft?.name}
-                  </div>
+            <div className="flex items-center gap-4">
+              {/* Airport count badge */}
+              {airportCount > 0 && (
+                <div className="flex items-center gap-2 bg-green-600/20 px-3 py-1 rounded-full">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                  <span className="text-green-300 text-sm font-medium">
+                    {airportCount} airports
+                  </span>
                 </div>
-                <button
-                  onClick={handleClearAll}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  New Flight
-                </button>
-              </div>
-            )}
+              )}
+
+              {flightPlan && (
+                <div className="flex items-center gap-4">
+                  <div className="text-white text-center">
+                    <div className="text-2xl font-bold">
+                      {flightPlan.departure.icao}
+                      <span className="mx-2 text-blue-300">→</span>
+                      {flightPlan.arrival.icao}
+                    </div>
+                    <div className="text-sm text-blue-200">
+                      {flightPlan.aircraft?.name}
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleClearAll}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
+                    New Flight
+                  </button>
+                </div>
+              )}
+
+              {/* Settings Button */}
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                title="Settings"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -544,6 +577,15 @@ const App: React.FC = () => {
         </div>
       </footer>
     </div>
+  );
+};
+
+// Wrap with Settings Provider
+const App: React.FC = () => {
+  return (
+    <SettingsProvider>
+      <AppContent />
+    </SettingsProvider>
   );
 };
 

@@ -22,3 +22,15 @@ export { AviationWeatherPanel } from './AviationWeatherPanel';
 
 // Dispatch
 export { DispatchPanel } from './DispatchPanel';
+
+// Settings
+export { 
+  SettingsPanel, 
+  SettingsProvider, 
+  useSettings, 
+  getMapTileUrl,
+  loadSettings,
+  saveSettings,
+  DEFAULT_SETTINGS,
+  type AppSettings,
+} from './SettingsPanel';

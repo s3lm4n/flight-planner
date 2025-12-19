@@ -1,8 +1,8 @@
 {
   "name": "flight-planner",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
-  "description": "Production-quality flight planning and visualization system",
+  "description": "Production-quality flight planning and simulation system with 3D visualization",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -10,6 +10,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
     "@turf/turf": "^7.1.0",
     "axios": "^1.6.2",
     "gsap": "^3.12.4",
@@ -17,6 +19,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
+    "three": "^0.160.1",
+    "wrangler": "^4.56.0",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
@@ -24,6 +28,7 @@
     "@types/node": "^25.0.3",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
+    "@types/three": "^0.160.0",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",

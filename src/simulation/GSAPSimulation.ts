@@ -688,12 +688,8 @@ export function useFlightSimulation(
           setAircraftState(controllerRef.current.toAircraftState());
         }
       },
-      onPhaseChange: (phase, _prev) => {
-        console.log(`Flight phase: ${phase}`);
-      },
-      onComplete: () => {
-        console.log('Flight complete');
-      },
+      onPhaseChange: (_phase, _prev) => {},
+      onComplete: () => {},
       onError: (error) => {
         console.error('Simulation error:', error);
       },

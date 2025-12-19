@@ -1,34 +1,16 @@
-/**
- * OpenAIP API Client
- * 
- * Authoritative source for airport data including:
- * - Airport coordinates
- * - Runway heading, length, surface
- * - ICAO validation
- * 
- * API Documentation: https://www.openaip.net/docs
- * 
- * Header: x-openaip-client-id: 837fd9e5ed75dd9111c70592a499600d
- */
-
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { EnhancedAirport, EnhancedRunway, RunwaySurfaceType } from '@/types/airport';
 import { Coordinate } from '@/types';
 
-// ============================================================================
-// CONFIGURATION
-// ============================================================================
-
-const OPENAIP_CLIENT_ID = '837fd9e5ed75dd9111c70592a499600d';
+const OPENAIP_CLIENT_ID = import.meta.env.VITE_OPENAIP_CLIENT_ID || '';
 const OPENAIP_API_BASE_URL = '/api/openaip';
 
-// Create axios instance
 const openAipApi: AxiosInstance = axios.create({
   baseURL: OPENAIP_API_BASE_URL,
   timeout: 15000,
   headers: {
     'Accept': 'application/json',
-    'x-openaip-client-id': OPENAIP_CLIENT_ID,
+    ...(OPENAIP_CLIENT_ID && { 'x-openaip-client-id': OPENAIP_CLIENT_ID }),
   },
 });
 
@@ -384,15 +366,12 @@ function parseOpenAIPAirport(data: OpenAIPAirportResponse): EnhancedAirport | nu
 export async function fetchAirportFromOpenAIP(icao: string): Promise<EnhancedAirport | null> {
   const upperIcao = icao.toUpperCase();
   
-  // Check cache first
   const cached = airportCache.get(upperIcao);
   if (isCacheValid(cached)) {
-    console.log(`[OpenAIP] Cache hit for ${upperIcao}`);
     return cached.data;
   }
   
   try {
-    console.log(`[OpenAIP] Fetching airport: ${upperIcao}`);
     
     const response = await openAipApi.get<OpenAIPSearchResponse>('/airports', {
       params: {

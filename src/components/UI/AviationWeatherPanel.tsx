@@ -113,9 +113,8 @@ export const AviationWeatherPanel: React.FC<AviationWeatherPanelProps> = ({
     setNextRefreshIn(30);
     
     const refreshIntervalId = setInterval(() => {
-      console.log('Auto-refreshing METAR/TAF data...');
       fetchWeather();
-      setNextRefreshIn(30); // Reset countdown after refresh
+      setNextRefreshIn(30);
     }, REFRESH_INTERVAL_MS);
     
     // Update countdown every minute

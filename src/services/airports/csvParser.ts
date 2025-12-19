@@ -353,7 +353,6 @@ export async function parseAirportsCsv(
     );
   }
   
-  console.log(`Parsed ${airports.length} airports from CSV`);
   return airports;
 }
 

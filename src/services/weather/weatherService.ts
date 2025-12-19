@@ -1,12 +1,3 @@
-/**
- * Fixed Weather API Integration
- * 
- * Correctly integrates with metar-taf.com API
- * API Documentation: https://metar-taf.com/api
- * 
- * API Key: DYAbhwvbj1CyKIWMDIIuFQD2BBvUjKYU
- */
-
 import axios, { AxiosInstance } from 'axios';
 import {
   Metar,
@@ -19,15 +10,7 @@ import {
   WeatherPhenomena,
 } from '@/types';
 
-// ============================================================================
-// CONFIGURATION
-// ============================================================================
-
-const METAR_TAF_API_KEY = 'DYAbhwvbj1CyKIWMDIIuFQD2BBvUjKYU';
-
-// The metar-taf.com API base URL
-// Note: API endpoint is https://metar-taf.com/api/v1
-// We proxy through Vite to avoid CORS issues
+const METAR_TAF_API_KEY = import.meta.env.VITE_WEATHER_API_KEY || '';
 const WEATHER_API_BASE_URL = '/api/weather';
 
 // ============================================================================

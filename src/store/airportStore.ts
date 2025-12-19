@@ -244,8 +244,6 @@ export const useAirportStore = create<AirportStore>()(
             source: 'csv',
             totalCount: airports.length,
           });
-          
-          console.log(`✅ Loaded ${airports.length} airports from CSV`);
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Failed to parse CSV';
           set({
@@ -276,8 +274,6 @@ export const useAirportStore = create<AirportStore>()(
             source: 'csv',
             totalCount: airports.length,
           });
-          
-          console.log(`✅ Loaded ${airports.length} airports from file: ${file.name}`);
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Failed to load file';
           set({
@@ -309,8 +305,6 @@ export const useAirportStore = create<AirportStore>()(
             source: 'api',
             totalCount: airports.length,
           });
-          
-          console.log(`✅ Loaded ${airports.length} airports from API`);
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Failed to fetch from API';
           set({

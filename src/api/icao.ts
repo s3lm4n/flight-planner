@@ -406,7 +406,6 @@ export async function fetchEuropeanAirports(): Promise<EnhancedAirport[]> {
       });
     });
     
-    console.log(`Loaded ${validAirports.length} European airports`);
     return validAirports;
   } catch (error) {
     console.error('Failed to fetch European airports:', error);

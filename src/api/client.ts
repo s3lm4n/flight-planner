@@ -1,14 +1,7 @@
-/**
- * API Configuration and Axios Instance
- */
-
 import axios, { AxiosError, AxiosInstance } from 'axios';
 
-// API Key for metar-taf.com
-const WEATHER_API_KEY = 'DYAbhwvbj1CyKIWMDIIuFQD2BBvUjKYU';
-
-// Base URLs
-const WEATHER_API_BASE_URL = '/api/weather'; // Proxied through Vite
+const WEATHER_API_KEY = import.meta.env.VITE_WEATHER_API_KEY || '';
+const WEATHER_API_BASE_URL = '/api/weather';
 
 /**
  * Create axios instance for weather API

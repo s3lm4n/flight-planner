@@ -1,21 +1,8 @@
-/**
- * Enhanced Weather API Service
- * 
- * Fetches METAR and TAF data from metar-taf.com API
- * API Key: DYAbhwvbj1CyKIWMDIIuFQD2BBvUjKYU
- * 
- * Provides parsed weather data for flight planning validation.
- */
-
 import axios, { AxiosInstance } from 'axios';
 import { Metar, Taf, TafPeriod, AirportWeather, Wind, Visibility, CloudLayer, WeatherPhenomena } from '@/types';
 
-// ============================================================================
-// CONFIGURATION
-// ============================================================================
-
-const WEATHER_API_KEY = 'DYAbhwvbj1CyKIWMDIIuFQD2BBvUjKYU';
-const WEATHER_API_BASE_URL = 'https://metar-taf.com/api';
+const WEATHER_API_KEY = import.meta.env.VITE_WEATHER_API_KEY || '';
+const WEATHER_API_BASE_URL = import.meta.env.VITE_WEATHER_API_URL || 'https://metar-taf.com/api';
 
 // Cache durations
 const METAR_CACHE_DURATION = 10 * 60 * 1000;  // 10 minutes

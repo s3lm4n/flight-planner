@@ -295,15 +295,9 @@ const AppContent: React.FC = () => {
   // Use the simple simulation hook
   const simulation = useSimpleSimulation({
     flightPlan,
-    onComplete: () => {
-      console.log('Flight completed!');
-    },
-    onPhaseChange: (phase, prevPhase) => {
-      console.log(`Phase changed: ${prevPhase} → ${phase}`);
-    },
-    onLegChange: (legIndex, leg) => {
-      console.log(`Now on leg ${legIndex + 1}: ${leg.from.id} → ${leg.to.id}`);
-    },
+    onComplete: () => {},
+    onPhaseChange: () => {},
+    onLegChange: () => {},
   });
 
   // Generate flight plan

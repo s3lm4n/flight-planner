@@ -705,7 +705,7 @@ export default function FlightPlannerApp() {
       <header className={styles.header}>
         <h1 className={styles.headerTitle}>✈️ Flight Planner Pro</h1>
         <p className={styles.headerSubtitle}>
-          Professional Flight Planning & Simulation System
+          Professional Flight Planning & Simulation System Demo
         </p>
       </header>
 

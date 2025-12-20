@@ -1,0 +1,23 @@
+{
+	"$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/schemas/config/wrangler.json",
+	"name": "flight-planner",
+	"main": "worker/src/index.ts",
+	"compatibility_date": "2024-12-01",
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS"
+	},
+	"kv_namespaces": [
+		{
+			"binding": "DATA_KV",
+			"id": "5f00e91857854c99903bdd9c9f6cf6f8"
+		}
+	],
+	"vars": {
+		"ENVIRONMENT": "production"
+	},
+	"dev": {
+		"port": 8787,
+		"local_protocol": "http"
+	}
+}

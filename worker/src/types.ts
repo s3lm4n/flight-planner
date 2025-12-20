@@ -2,8 +2,33 @@ export interface Env {
   DATA_KV: KVNamespace;
   ASSETS: Fetcher;
   ENVIRONMENT: string;
+  
+  // === REQUIRED SECRETS ===
+  // Set these using: wrangler secret put <KEY_NAME>
+  
+  /** Admin panel password */
   ADMIN_PASSWORD?: string;
+  
+  /** Internal API authentication key */
   API_SECRET_KEY?: string;
+  
+  /** ICAO API key for airport/runway data */
+  ICAO_API_KEY?: string;
+  
+  /** OpenAIP client ID for airspace data */
+  OPENAIP_CLIENT_ID?: string;
+  
+  /** Weather API key (if using paid weather service) */
+  WEATHER_API_KEY?: string;
+  
+  /** AirportDB API key - https://airportdb.io */
+  AIRPORTDB_API_KEY?: string;
+  
+  /** AviationStack API key - https://aviationstack.com */
+  AVIATIONSTACK_API_KEY?: string;
+  
+  /** AirportGap API token - https://airportgap.com */
+  AIRPORTGAP_API_KEY?: string;
 }
 
 export const STORAGE_KEYS = {

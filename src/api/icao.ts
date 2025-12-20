@@ -6,7 +6,8 @@
  * - NOTAMs
  * - Airport information
  * 
- * API Key: ea2cd274-4785-4c82-9a54-558c8b956a06
+ * SECURITY: API key is stored as Cloudflare Worker secret (ICAO_API_KEY)
+ * The worker proxies requests and injects the key server-side.
  */
 
 import axios, { AxiosInstance, AxiosError } from 'axios';
@@ -30,8 +31,9 @@ import {
 // CONFIGURATION
 // ============================================================================
 
-const ICAO_API_KEY = 'ea2cd274-4785-4c82-9a54-558c8b956a06';
-const ICAO_API_BASE_URL = '/api/icao';  // Proxied through Vite
+// API key is injected server-side by Cloudflare Worker
+// DO NOT hardcode API keys in frontend code
+const ICAO_API_BASE_URL = '/api/icao';  // Proxied through Worker
 
 // Cache durations
 const AIRPORT_CACHE_DURATION = 24 * 60 * 60 * 1000;  // 24 hours
@@ -103,12 +105,14 @@ const allAirportsCache: { airports: EnhancedAirport[]; fetchedAt: Date | null } 
 // API CLIENT
 // ============================================================================
 
+// SECURITY: API key is injected server-side by Cloudflare Worker
+// The frontend makes requests to /api/icao/* which are proxied by the worker
 const icaoApi: AxiosInstance = axios.create({
   baseURL: ICAO_API_BASE_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
-    'api-key': ICAO_API_KEY,
+    // API key is NOT included here - it's added server-side by the Worker
   },
 });
 

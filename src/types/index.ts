@@ -7,6 +7,9 @@
 
 import { Feature, FeatureCollection, LineString, Point } from 'geojson';
 
+// Re-export runway types from dedicated module
+export * from './runway';
+
 // ============================================================================
 // GEOGRAPHIC TYPES
 // ============================================================================
@@ -523,6 +526,23 @@ export interface TafApiResponse {
 }
 
 // Re-export enhanced types from separate modules
-export * from './airport';
-export * from './aircraft';
+// Note: RunwaySurfaceType is defined in both runway.ts and airport.ts
+// We use the runway.ts version as authoritative, so selectively export from airport.ts
+export { 
+  type EnhancedAirport,
+  type EnhancedRunway,
+  type RunwayStatus,
+  type AirportType,
+  type NotamType,
+  type NotamSeverity,
+  type Notam,
+  type IcaoAirportResponse,
+  type IcaoRunwayResponse,
+  type IcaoNotamResponse,
+  type AirportCacheEntry,
+  type NotamCacheEntry,
+  type AirportSearchFilters,
+  type AirportSearchResult,
+} from './airport';
 
+export * from './aircraft';

@@ -1,19 +1,19 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
 
-const WEATHER_API_KEY = import.meta.env.VITE_WEATHER_API_KEY || '';
+// Weather API base URL - all requests proxied through Cloudflare Worker
+// API keys are stored as Worker secrets and injected server-side
 const WEATHER_API_BASE_URL = '/api/weather';
 
 /**
  * Create axios instance for weather API
+ * SECURITY: API keys are NOT included in frontend requests.
+ * The Cloudflare Worker injects keys server-side.
  */
 export const weatherApi: AxiosInstance = axios.create({
   baseURL: WEATHER_API_BASE_URL,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
-  },
-  params: {
-    api_key: WEATHER_API_KEY,
   },
 });
 

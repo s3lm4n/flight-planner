@@ -1,6 +1,15 @@
 /**
  * Public API Handler
- * Handles /api/* routes - requires valid API key
+ * Handles /api/* routes
+ * 
+ * SECURITY: External API keys are stored as Cloudflare Worker secrets.
+ * This worker injects API keys server-side to keep them out of frontend code.
+ * 
+ * Required secrets (set via `wrangler secret put <KEY_NAME>`):
+ * - ADMIN_PASSWORD: Admin panel authentication
+ * - ICAO_API_KEY: ICAO API for airport/runway data
+ * - OPENAIP_CLIENT_ID: OpenAIP for airspace data
+ * - WEATHER_API_KEY: Weather service (if needed)
  */
 
 import { Env, STORAGE_KEYS, Airport, Notam } from './types';
@@ -17,6 +26,41 @@ export async function handleApiRequest(request: Request, env: Env, ctx: Executio
   // Health check - no auth required
   if (path === '/api/health') {
     return jsonResponse({ status: 'ok', timestamp: new Date().toISOString() });
+  }
+  
+  // AWC Weather proxy - no auth required (public weather data)
+  if (path.startsWith('/api/awc/')) {
+    return proxyAWCRequest(request, path);
+  }
+  
+  // ICAO API proxy - injects API key server-side
+  if (path.startsWith('/api/icao/')) {
+    return proxyICAORequest(request, path, env);
+  }
+  
+  // OpenAIP proxy - injects client ID server-side
+  if (path.startsWith('/api/openaip/')) {
+    return proxyOpenAIPRequest(request, path, env);
+  }
+  
+  // Weather API proxy (metar-taf or other paid service)
+  if (path.startsWith('/api/weather/')) {
+    return proxyWeatherRequest(request, path, env);
+  }
+  
+  // AirportDB proxy - https://airportdb.io
+  if (path.startsWith('/api/airportdb/')) {
+    return proxyAirportDBRequest(request, path, env);
+  }
+  
+  // AviationStack proxy - https://aviationstack.com
+  if (path.startsWith('/api/aviationstack/')) {
+    return proxyAviationStackRequest(request, path, env);
+  }
+  
+  // AirportGap proxy - https://airportgap.com
+  if (path.startsWith('/api/airportgap/')) {
+    return proxyAirportGapRequest(request, path, env);
   }
   
   // All other API routes require API key
@@ -50,6 +94,64 @@ export async function handleApiRequest(request: Request, env: Env, ctx: Executio
     
     default:
       return jsonResponse({ error: 'Not found' }, 404);
+  }
+}
+
+/**
+ * Proxy requests to AviationWeather.gov API
+ * No API key required - public data
+ */
+async function proxyAWCRequest(request: Request, path: string): Promise<Response> {
+  const AWC_BASE = 'https://aviationweather.gov/api/data';
+  
+  // Extract the AWC endpoint (metar, taf, etc.)
+  const awcPath = path.replace('/api/awc/', '');
+  const url = new URL(request.url);
+  
+  // Build the AWC URL with query params
+  const awcUrl = new URL(`${AWC_BASE}/${awcPath}`);
+  
+  // Copy all query params
+  url.searchParams.forEach((value, key) => {
+    awcUrl.searchParams.set(key, value);
+  });
+  
+  // Ensure JSON format
+  if (!awcUrl.searchParams.has('format')) {
+    awcUrl.searchParams.set('format', 'json');
+  }
+  
+  try {
+    const response = await fetch(awcUrl.toString(), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'FlightPlanner/1.0',
+      },
+    });
+    
+    if (!response.ok) {
+      return jsonResponse({
+        error: 'AWC request failed',
+        status: response.status,
+        statusText: response.statusText,
+      }, response.status);
+    }
+    
+    const data = await response.json();
+    
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
+      },
+    });
+  } catch (error) {
+    return jsonResponse({
+      error: 'Failed to fetch from AviationWeather.gov',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    }, 502);
   }
 }
 
@@ -331,4 +433,377 @@ function jsonResponse(data: unknown, status: number = 200): Response {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
+}
+
+// ============================================================================
+// EXTERNAL API PROXIES - Server-side API key injection
+// ============================================================================
+
+/**
+ * Proxy requests to ICAO API
+ * Injects ICAO_API_KEY from Worker secrets
+ * 
+ * Frontend calls: /api/icao/airports?icao=KJFK
+ * Proxied to: https://api.icao.org/... with API key header
+ */
+async function proxyICAORequest(request: Request, path: string, env: Env): Promise<Response> {
+  if (!env.ICAO_API_KEY) {
+    return jsonResponse({
+      error: 'ICAO API not configured',
+      message: 'ICAO_API_KEY secret is not set. Run: wrangler secret put ICAO_API_KEY',
+    }, 503);
+  }
+
+  const ICAO_API_BASE = 'https://applications.icao.int/dataservices/api';
+  
+  // Extract the ICAO endpoint
+  const icaoPath = path.replace('/api/icao/', '');
+  const url = new URL(request.url);
+  
+  // Build the ICAO URL
+  const icaoUrl = new URL(`${ICAO_API_BASE}/${icaoPath}`);
+  
+  // Copy query params
+  url.searchParams.forEach((value, key) => {
+    icaoUrl.searchParams.set(key, value);
+  });
+  
+  // Add API key
+  icaoUrl.searchParams.set('api_key', env.ICAO_API_KEY);
+  icaoUrl.searchParams.set('format', 'json');
+
+  try {
+    const response = await fetch(icaoUrl.toString(), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'FlightPlanner/1.0',
+      },
+    });
+
+    if (!response.ok) {
+      return jsonResponse({
+        error: 'ICAO API request failed',
+        status: response.status,
+      }, response.status);
+    }
+
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+      },
+    });
+  } catch (error) {
+    return jsonResponse({
+      error: 'Failed to fetch from ICAO API',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    }, 502);
+  }
+}
+
+/**
+ * Proxy requests to OpenAIP
+ * Injects OPENAIP_CLIENT_ID from Worker secrets
+ */
+async function proxyOpenAIPRequest(request: Request, path: string, env: Env): Promise<Response> {
+  if (!env.OPENAIP_CLIENT_ID) {
+    return jsonResponse({
+      error: 'OpenAIP API not configured',
+      message: 'OPENAIP_CLIENT_ID secret is not set. Run: wrangler secret put OPENAIP_CLIENT_ID',
+    }, 503);
+  }
+
+  const OPENAIP_BASE = 'https://api.core.openaip.net/api';
+  
+  // Extract the OpenAIP endpoint
+  const openaipPath = path.replace('/api/openaip/', '');
+  const url = new URL(request.url);
+  
+  // Build the OpenAIP URL
+  const openaipUrl = new URL(`${OPENAIP_BASE}/${openaipPath}`);
+  
+  // Copy query params
+  url.searchParams.forEach((value, key) => {
+    openaipUrl.searchParams.set(key, value);
+  });
+
+  try {
+    const response = await fetch(openaipUrl.toString(), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'x-openaip-client-id': env.OPENAIP_CLIENT_ID,
+        'User-Agent': 'FlightPlanner/1.0',
+      },
+    });
+
+    if (!response.ok) {
+      return jsonResponse({
+        error: 'OpenAIP request failed',
+        status: response.status,
+      }, response.status);
+    }
+
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    });
+  } catch (error) {
+    return jsonResponse({
+      error: 'Failed to fetch from OpenAIP',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    }, 502);
+  }
+}
+
+/**
+ * Proxy requests to Weather API (metar-taf.com or similar)
+ * Injects WEATHER_API_KEY from Worker secrets
+ */
+async function proxyWeatherRequest(request: Request, path: string, env: Env): Promise<Response> {
+  // Weather API is optional - return 503 if not configured
+  if (!env.WEATHER_API_KEY) {
+    return jsonResponse({
+      error: 'Weather API not configured',
+      message: 'WEATHER_API_KEY secret is not set. Use /api/awc for free weather data.',
+    }, 503);
+  }
+
+  const WEATHER_BASE = 'https://api.metar-taf.com';
+  
+  // Extract the weather endpoint
+  const weatherPath = path.replace('/api/weather/', '');
+  const url = new URL(request.url);
+  
+  // Build the Weather URL
+  const weatherUrl = new URL(`${WEATHER_BASE}/${weatherPath}`);
+  
+  // Copy query params
+  url.searchParams.forEach((value, key) => {
+    weatherUrl.searchParams.set(key, value);
+  });
+  
+  // Add API key
+  weatherUrl.searchParams.set('api_key', env.WEATHER_API_KEY);
+
+  try {
+    const response = await fetch(weatherUrl.toString(), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'FlightPlanner/1.0',
+      },
+    });
+
+    if (!response.ok) {
+      return jsonResponse({
+        error: 'Weather API request failed',
+        status: response.status,
+      }, response.status);
+    }
+
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
+      },
+    });
+  } catch (error) {
+    return jsonResponse({
+      error: 'Failed to fetch weather data',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    }, 502);
+  }
+}
+
+/**
+ * Proxy requests to AirportDB API
+ * https://airportdb.io
+ * Injects AIRPORTDB_API_KEY from Worker secrets
+ */
+async function proxyAirportDBRequest(request: Request, path: string, env: Env): Promise<Response> {
+  if (!env.AIRPORTDB_API_KEY) {
+    return jsonResponse({
+      error: 'AirportDB API not configured',
+      message: 'AIRPORTDB_API_KEY secret is not set. Run: wrangler secret put AIRPORTDB_API_KEY',
+    }, 503);
+  }
+
+  const AIRPORTDB_BASE = 'https://airportdb.io/api/v1';
+  
+  // Extract the endpoint
+  const apiPath = path.replace('/api/airportdb/', '');
+  const url = new URL(request.url);
+  
+  // Build the AirportDB URL
+  const targetUrl = new URL(`${AIRPORTDB_BASE}/${apiPath}`);
+  
+  // Copy query params
+  url.searchParams.forEach((value, key) => {
+    targetUrl.searchParams.set(key, value);
+  });
+
+  try {
+    const response = await fetch(targetUrl.toString(), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'X-API-Key': env.AIRPORTDB_API_KEY,
+        'User-Agent': 'FlightPlanner/1.0',
+      },
+    });
+
+    if (!response.ok) {
+      return jsonResponse({
+        error: 'AirportDB request failed',
+        status: response.status,
+      }, response.status);
+    }
+
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+      },
+    });
+  } catch (error) {
+    return jsonResponse({
+      error: 'Failed to fetch from AirportDB',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    }, 502);
+  }
+}
+
+/**
+ * Proxy requests to AviationStack API
+ * https://aviationstack.com
+ * Injects AVIATIONSTACK_API_KEY from Worker secrets
+ */
+async function proxyAviationStackRequest(request: Request, path: string, env: Env): Promise<Response> {
+  if (!env.AVIATIONSTACK_API_KEY) {
+    return jsonResponse({
+      error: 'AviationStack API not configured',
+      message: 'AVIATIONSTACK_API_KEY secret is not set. Run: wrangler secret put AVIATIONSTACK_API_KEY',
+    }, 503);
+  }
+
+  const AVIATIONSTACK_BASE = 'https://api.aviationstack.com/v1';
+  
+  // Extract the endpoint
+  const apiPath = path.replace('/api/aviationstack/', '');
+  const url = new URL(request.url);
+  
+  // Build the AviationStack URL
+  const targetUrl = new URL(`${AVIATIONSTACK_BASE}/${apiPath}`);
+  
+  // Copy query params
+  url.searchParams.forEach((value, key) => {
+    targetUrl.searchParams.set(key, value);
+  });
+  
+  // Add API key as query param (AviationStack uses access_key)
+  targetUrl.searchParams.set('access_key', env.AVIATIONSTACK_API_KEY);
+
+  try {
+    const response = await fetch(targetUrl.toString(), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'FlightPlanner/1.0',
+      },
+    });
+
+    if (!response.ok) {
+      return jsonResponse({
+        error: 'AviationStack request failed',
+        status: response.status,
+      }, response.status);
+    }
+
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
+      },
+    });
+  } catch (error) {
+    return jsonResponse({
+      error: 'Failed to fetch from AviationStack',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    }, 502);
+  }
+}
+
+/**
+ * Proxy requests to AirportGap API
+ * https://airportgap.com
+ * Injects AIRPORTGAP_API_KEY from Worker secrets
+ */
+async function proxyAirportGapRequest(request: Request, path: string, env: Env): Promise<Response> {
+  if (!env.AIRPORTGAP_API_KEY) {
+    return jsonResponse({
+      error: 'AirportGap API not configured',
+      message: 'AIRPORTGAP_API_KEY secret is not set. Run: wrangler secret put AIRPORTGAP_API_KEY',
+    }, 503);
+  }
+
+  const AIRPORTGAP_BASE = 'https://airportgap.com/api';
+  
+  // Extract the endpoint
+  const apiPath = path.replace('/api/airportgap/', '');
+  const url = new URL(request.url);
+  
+  // Build the AirportGap URL
+  const targetUrl = new URL(`${AIRPORTGAP_BASE}/${apiPath}`);
+  
+  // Copy query params
+  url.searchParams.forEach((value, key) => {
+    targetUrl.searchParams.set(key, value);
+  });
+
+  try {
+    const response = await fetch(targetUrl.toString(), {
+      method: request.method,
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${env.AIRPORTGAP_API_KEY}`,
+        'User-Agent': 'FlightPlanner/1.0',
+      },
+      body: request.method !== 'GET' ? await request.text() : undefined,
+    });
+
+    if (!response.ok) {
+      return jsonResponse({
+        error: 'AirportGap request failed',
+        status: response.status,
+      }, response.status);
+    }
+
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+      },
+    });
+  } catch (error) {
+    return jsonResponse({
+      error: 'Failed to fetch from AirportGap',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    }, 502);
+  }
 }

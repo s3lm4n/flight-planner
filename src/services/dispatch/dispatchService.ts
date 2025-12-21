@@ -134,7 +134,6 @@ export interface DispatchInput {
 const CONTINGENCY_FACTOR = 0.05;      // 5% of trip fuel
 const HOLDING_TIME_MIN = 30;           // 30 minutes holding
 const FINAL_RESERVE_TIME_MIN = 30;     // 30 minutes final reserve
-const TAXI_FUEL_TIME_MIN = 10;         // 10 minutes taxi (average)
 const ALTERNATE_DISTANCE_NM = 100;     // Assume 100nm to alternate if not specified
 
 // Minimum weather requirements (IFR)
@@ -442,7 +441,8 @@ function calculateFuelPlan(input: DispatchInput, perf: AircraftPerformanceData):
   const totalFlightTimeMin = totalFlightTimeHrs * 60;
   
   // Calculate taxi fuel
-  const taxiFuel = (TAXI_FUEL_TIME_MIN / 60) * perf.taxiFuelBurn;
+  // Fixed taxi fuel per dispatch requirement
+  const taxiFuel = 400; // kg
   
   // Calculate trip fuel
   const climbFuel = climbTime * perf.climbFuelBurn;

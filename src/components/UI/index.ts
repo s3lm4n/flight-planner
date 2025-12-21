@@ -13,6 +13,9 @@ export { EnhancedAirportSelector } from './EnhancedAirportSelector';
 export { EnhancedAircraftSelector } from './EnhancedAircraftSelector';
 export { ValidationWarningsPanel } from './ValidationWarningsPanel';
 
+// Runway selector - CRITICAL for runway-based operations
+export { RunwaySelector } from './RunwaySelector';
+
 // New components
 export { NotamPanel } from './NotamPanel';
 export { SimulationDashboard } from './SimulationDashboard';

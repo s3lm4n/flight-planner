@@ -32,7 +32,7 @@ export const aircraftDatabase: Record<string, Aircraft> = {
       v2: 155,
       vRef: 135,
       cruiseSpeed: 450,
-      maxSpeed: 340, // Mach 0.82
+      maxSpeed: 547, // Mach 0.82
       stallSpeed: 107,
       climbRate: 2500,
       descentRate: 1800,
@@ -42,7 +42,7 @@ export const aircraftDatabase: Record<string, Aircraft> = {
       optimalAltitude: 36000,
       fuelBurn: 850, // gallons/hour
       fuelCapacity: 6875,
-      maxRange: 2935
+      maxRange: 3060
     },
     dimensions: {
       wingspan: 117,
@@ -64,8 +64,8 @@ export const aircraftDatabase: Record<string, Aircraft> = {
       vR: 153,
       v2: 158,
       vRef: 140,
-      cruiseSpeed: 450,
-      maxSpeed: 340,
+      cruiseSpeed: 460,
+      maxSpeed: 540,
       stallSpeed: 112,
       climbRate: 2400,
       descentRate: 1800,

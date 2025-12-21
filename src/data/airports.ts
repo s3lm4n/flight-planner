@@ -1041,8 +1041,8 @@ export const airports: Record<string, Airport> = {
     }
   },
 
-  LTBU: {
-    icao: 'LTBU',
+  LTCN: {
+    icao: 'LTCN',
     iata: 'KCM',
     name: 'Kahramanmaraş Airport',
     city: 'Kahramanmaraş',
@@ -1095,8 +1095,8 @@ export const airports: Record<string, Airport> = {
     }
   },
 
-  LTCN: {
-    icao: 'LTCN',
+  LTBU: {
+    icao: 'LTBU',
     iata: 'TEQ',
     name: 'Tekirdağ Çorlu Airport',
     city: 'Tekirdağ',

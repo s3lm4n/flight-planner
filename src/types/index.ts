@@ -10,6 +10,9 @@ import { Feature, FeatureCollection, LineString, Point } from 'geojson';
 // Re-export runway types from dedicated module
 export * from './runway';
 
+// Re-export simulation types (FS2024-style phase-based)
+export * from './simulation';
+
 // ============================================================================
 // GEOGRAPHIC TYPES
 // ============================================================================

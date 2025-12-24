@@ -733,10 +733,12 @@ export function calculateRTOW(
   // Simplified: reduce by 2% per 1000ft elevation, 1% per 10°C above ISA
   const isaTemp = 15 - (elevationFt / 1000) * 2; // ISA temp at elevation
   const tempDelta = temperatureC - isaTemp;
-  
+  const runwayLengthFactor = runwayLengthM / aircraft.takeoffDistanceM;
+  const effectiveRunwayLengthM = runwayLengthM * runwayLengthFactor;
   const elevationFactor = 1 - (elevationFt / 1000) * 0.02;
   const tempFactor = 1 - Math.max(0, tempDelta / 10) * 0.01;
   const windFactor = 1 + (headwindKts * 0.005) - (tailwindKts * 0.015);
+  const windEffect = Math.max(0.85, windFactor); // Limit wind effect
   
   // Base runway limit
   const requiredRunway = aircraft.takeoffDistanceM / (elevationFactor * tempFactor * windFactor);

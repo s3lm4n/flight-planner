@@ -37,3 +37,13 @@ export {
   DEFAULT_SETTINGS,
   type AppSettings,
 } from './SettingsPanel';
+
+// Advanced Flight Settings
+export {
+  AdvancedFlightSettings,
+  type AdvancedSettings,
+  type WeightSettings,
+  type SpeedSettings,
+  type FuelSettings,
+  type PerformanceSettings,
+} from './AdvancedFlightSettings';

@@ -203,6 +203,28 @@ input[type="range"].slider-purple::-moz-range-thumb:hover {
   border-top-color: #3B82F6;
 }
 
+/* Custom scrollbar for dark theme */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-gray-800 rounded;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded hover:bg-gray-500;
+}
+
+/* Advanced settings panel */
+.advanced-flight-settings .settings-panel {
+  @apply text-gray-200;
+}
+
+.bg-gray-750 {
+  background-color: #2d3748;
+}
+
 /* Route segment colors */
 .segment-sid {
   color: var(--sid-color);

@@ -52,6 +52,116 @@ const RUNWAY_COLORS = {
 };
 
 // ============================================================================
+// STYLING PROPS TYPES (WCAG-compliant text/background contrast)
+// ============================================================================
+
+type BackgroundVariant = 'light' | 'dark';
+type TextVariant = 'primary' | 'secondary';
+type Emphasis = 'normal' | 'highlight';
+
+interface DerivedStyles {
+  container: React.CSSProperties;
+  heading: React.CSSProperties;
+  text: React.CSSProperties;
+  secondary: React.CSSProperties;
+  accent: React.CSSProperties;
+}
+
+/**
+ * Derive all colors from explicit props - no internal state-based color decisions
+ * Enforces WCAG contrast: light bg → dark text, dark bg → light text
+ */
+function getStylesFromProps(
+  backgroundVariant: BackgroundVariant,
+  textVariant: TextVariant,
+  emphasis: Emphasis
+): DerivedStyles {
+  const isLightBg = backgroundVariant === 'light';
+  const isPrimary = textVariant === 'primary';
+  const isHighlight = emphasis === 'highlight';
+
+  // WCAG-compliant text colors based on background
+  const primaryTextColor = isLightBg ? '#1a202c' : '#ffffff';  // gray-900 or white
+  const secondaryTextColor = isLightBg ? '#4a5568' : '#a0aec0'; // gray-600 or gray-400
+  const accentColor = isHighlight 
+    ? (isLightBg ? '#2563eb' : '#60a5fa')  // blue-600 or blue-400
+    : (isLightBg ? '#059669' : '#34d399'); // green-600 or green-400
+
+  return {
+    container: {
+      textAlign: 'center' as const,
+    },
+    heading: {
+      color: isPrimary ? primaryTextColor : secondaryTextColor,
+      fontWeight: 'bold',
+      fontSize: '1.125rem', // text-lg
+      lineHeight: '1.75rem',
+    },
+    text: {
+      color: isPrimary ? primaryTextColor : secondaryTextColor,
+      fontSize: '0.875rem', // text-sm
+      lineHeight: '1.25rem',
+    },
+    secondary: {
+      color: secondaryTextColor,
+      fontSize: '0.875rem',
+      lineHeight: '1.25rem',
+    },
+    accent: {
+      color: accentColor,
+      fontSize: '0.875rem',
+      lineHeight: '1.25rem',
+    },
+  };
+}
+
+// ============================================================================
+// RUNWAY INFO POPUP COMPONENT
+// ============================================================================
+
+interface RunwayInfoPopupProps {
+  designator: string;
+  heading: number;
+  elevation: number;
+  ils?: {
+    category: string;
+    frequency: number;
+  };
+  backgroundVariant: BackgroundVariant;
+  textVariant: TextVariant;
+  emphasis: Emphasis;
+}
+
+/**
+ * Displays runway information in a popup with explicit prop-based styling.
+ * All colors are derived from props - no internal state-based color decisions.
+ */
+function RunwayInfoPopup({
+  designator,
+  heading,
+  elevation,
+  ils,
+  backgroundVariant,
+  textVariant,
+  emphasis,
+}: RunwayInfoPopupProps) {
+  const styles = getStylesFromProps(backgroundVariant, textVariant, emphasis);
+
+  return (
+    <div style={styles.container}>
+      <p style={styles.heading}>{designator}</p>
+      <p style={styles.text}>Heading: {heading}°</p>
+      <p style={styles.text}>Elevation: {elevation}ft</p>
+      {ils && (
+        <p style={styles.accent}>
+          ILS CAT {ils.category} - {ils.frequency}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
 
@@ -351,16 +461,20 @@ function SingleRunway({
               }}
             >
               <Popup>
-                <div className="text-center">
-                  <p className="font-bold text-lg">{end.designator}</p>
-                  <p className="text-sm">Heading: {end.heading}°</p>
-                  <p className="text-sm">Elevation: {end.elevation}ft</p>
-                  {end.ils && (
-                    <p className="text-sm text-green-600">
-                      ILS CAT {end.ils.category} - {end.ils.frequency}
-                    </p>
-                  )}
-                </div>
+                {/* 
+                  Leaflet popups have white background by default.
+                  Pass explicit styling props to ensure WCAG-compliant contrast.
+                  Selected state uses highlight emphasis for visual distinction.
+                */}
+                <RunwayInfoPopup
+                  designator={end.designator}
+                  heading={end.heading}
+                  elevation={end.elevation}
+                  ils={end.ils}
+                  backgroundVariant="light"
+                  textVariant="primary"
+                  emphasis={isSelected ? 'highlight' : 'normal'}
+                />
               </Popup>
             </Marker>
 

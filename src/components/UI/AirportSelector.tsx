@@ -140,7 +140,7 @@ export const AirportSelector: React.FC<AirportSelectorProps> = ({
                 placeholder={placeholder}
                 className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
               />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
                 {icon || (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -168,7 +168,7 @@ export const AirportSelector: React.FC<AirportSelectorProps> = ({
                       <div className="text-sm font-medium text-gray-800 truncate">
                         {airport.name}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-600">
                         {airport.city}, {airport.country} • Elev: {airport.elevation} ft
                       </div>
                     </div>
@@ -178,7 +178,7 @@ export const AirportSelector: React.FC<AirportSelectorProps> = ({
             )}
             
             {isOpen && query && results.length === 0 && (
-              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500">
+              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-600">
                 No airports found for "{query}"
               </div>
             )}

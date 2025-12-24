@@ -40,6 +40,7 @@ import {
   AircraftPerformance,
   getAircraft,
 } from '@/services/dispatcher/dispatcherService';
+import { AdvancedFlightSettings, AdvancedSettings } from '@/components/UI/AdvancedFlightSettings';
 
 // ============================================================================
 // STYLES
@@ -504,6 +505,11 @@ export default function RunwayBasedFlightPlannerApp() {
   const [route, setRoute] = useState<FlightRoute | null>(null);
   const [routeError, setRouteError] = useState<string | null>(null);
   
+  // Advanced settings (used for fuel/performance calculations)
+  const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings | null>(null);
+  // Note: advancedSettings can be used to override aircraft performance values
+  void advancedSettings; // Will be used in future route calculations
+  
   // Camera
   const [cameraMode, setCameraMode] = useState<'orbit' | 'follow'>('orbit');
 
@@ -772,6 +778,13 @@ export default function RunwayBasedFlightPlannerApp() {
               <AircraftSelector
                 value={aircraftCode}
                 onChange={handleAircraftChange}
+              />
+              
+              {/* Advanced Flight Settings */}
+              <AdvancedFlightSettings
+                aircraftCode={aircraftCode || undefined}
+                onSettingsChange={setAdvancedSettings}
+                collapsed={true}
               />
               
               {/* Validation */}
